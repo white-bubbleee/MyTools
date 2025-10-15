@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# 设置中文字体（Windows 一般有 SimHei；Mac 可用 PingFang 或 Heiti）
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 指定默认字体
+plt.rcParams['axes.unicode_minus'] = False    # 解决负号 '-' 显示为方块的问题
+
 st.set_page_config(page_title="智能评分系统", layout="centered")
 
 st.title("🎯 智能评分与排序系统")
@@ -54,10 +58,23 @@ if st.button("计算结果"):
         st.dataframe(df)
 
         # --- 绘图显示 ---
-        st.write("### 排名图：")
-        fig, ax = plt.subplots()
-        ax.barh(df["对象"], df["总分"], color="skyblue")
-        ax.invert_yaxis()
-        ax.set_xlabel("得分")
-        ax.set_title("总分排名")
+        st.write("### 📊 排名图：")
+
+        fig, ax = plt.subplots(figsize=(7, 4))
+        # 按总分升序画，最高分在最上面
+        df_plot = df.sort_values("总分")
+
+        bars = ax.barh(df_plot["对象"], df_plot["总分"], color="#5DADE2", alpha=0.8, height=0.5)
+        ax.set_xlabel("总分", fontsize=15)
+        ax.set_ylabel("对象", fontsize=15)
+        ax.set_title("职业评分排名", fontsize=18, weight="bold", pad=10)
+        ax.grid(axis="x", linestyle="--", alpha=0.5)
+
+        # 在每个条形后面显示具体分数
+        for bar in bars:
+            width = bar.get_width()
+            ax.text(width + 0.01, bar.get_y() + bar.get_height()/2,
+                    f"{width:.2f}", va="center", fontsize=13, color="black")
+
         st.pyplot(fig)
+
